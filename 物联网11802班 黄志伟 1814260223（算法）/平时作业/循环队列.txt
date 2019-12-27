@@ -1,0 +1,204 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<assert.h>
+
+#define OK    1
+#define ERROR 0
+#define TRUE  1
+#define FALSE 0
+#define MAXSIZE 10
+
+typedef  int  Elemtype;
+typedef  int  Status;
+typedef  struct {
+	Elemtype *base;
+	int front;
+	int rear;
+}SqQueue;
+void InitQueue(SqQueue *Q)
+{
+	Q->base=(Elemtype*)malloc(sizeof(Elemtype)*MAXSIZE);
+	assert(Q->base!=NULL);
+	Q->front=Q->rear=0;
+}
+Status EnQueue(SqQueue*Q,Elemtype e)
+{
+	if((Q->rear+1)%MAXSIZE==Q->front)
+	{
+		return ERROR;
+	}
+	Q->base[Q->rear]=e;
+	Q->rear=(Q->rear+1)%MAXSIZE;
+	return OK;
+}
+Status QueueEmpty(SqQueue *Q)
+{
+	if(Q->rear==Q->front)
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+Status QueueLength(SqQueue *Q)
+{
+	return (Q->rear-Q->front+MAXSIZE)%MAXSIZE;
+}
+Status GetHead(SqQueue *Q,Elemtype *e)
+{
+	if(Q->rear==Q->front)
+	{
+		return ERROR;
+	}
+	*e=Q->base[Q->front];
+	return OK;
+}
+void ClearQueue(SqQueue *Q)
+{
+	Q->front=Q->rear=0;
+}
+
+void DestoryQueue(SqQueue *Q)
+{
+	if(Q->base)
+	{
+		free(Q->base);
+	}
+	Q->base=0;
+	Q->front=Q->rear=0;
+}
+Status DeQueue(SqQueue *Q,Elemtype *e)
+{
+	if(Q->rear==Q->front)
+	{
+		return ERROR;
+	}
+	*e=Q->base[Q->front];
+	Q->front=(Q->front+1)%MAXSIZE;
+	return OK;
+}
+
+void QueueTraverse(SqQueue *Q,void(*visit)(Elemtype))
+{
+	int i=Q->front;
+	while(i!=Q->rear)
+	{
+		visit(Q->base[i]);
+		i=(i+1)%MAXSIZE;
+	}
+	printf("\n");
+}
+void Print(Elemtype e)
+{
+	printf("%d ",e);
+}
+int main()
+{
+	int i,k;
+	Elemtype d,e;
+	SqQueue Q;
+	InitQueue(&Q);
+	printf("请输入%d个队列元素:\n",MAXSIZE-1);
+	for(i=1;i<MAXSIZE;i++)
+	{
+		scanf("%d",&d);
+		EnQueue(&Q,d);
+	}
+	printf("队列元素为:");
+	QueueTraverse(&Q,Print);
+	printf("队列长度为%d\n",QueueLength(&Q));
+
+	k=QueueLength(&Q);
+	printf("连续%d次由对头删除元素，队尾插入元素:\n",k/2);
+	for(i=0;i<k/2;i++)
+	{
+		DeQueue(&Q,&e);
+		printf("删除的队列的元素是：%d,请输入插入的元素：",e);
+		scanf("%d",&d);
+		EnQueue(&Q,d);
+	}
+	printf("新的队列元素为：\n");
+	QueueTraverse(&Q,Print);
+
+	int n=GetHead(&Q,&e);
+	if(n)printf("对头元素为：%d\n",e);
+	else {
+		printf("队空!\n");	return -1;
+	}
+	ClearQueue(&Q);
+	printf("清空队列后队列是否为空：%d\t(1:为空 ,0:不为空)\n",QueueEmpty(&Q));
+	DestoryQueue(&Q);
+	printf("销毁队列后:\nQ.base=%u\tQ.front=%d\tQ.rear=%d\t\n",Q.base,Q.front,Q.rear);
+	return 0;
+}
+
+杨辉三角代码：
+#include<stdio.h>
+#include<malloc.h>
+#include<stdlib.h>
+
+#define MAXQSIZE 200
+typedef int QElemType;
+typedef struct {
+    QElemType  *base;
+    int front;
+    int rear;
+}SqQueue;
+void InitQueue(SqQueue *Q){
+    //构造一个空队列Q
+    Q->base=(QElemType *)malloc(MAXQSIZE*sizeof(QElemType));
+    if(!Q->base)exit(1);
+    Q->front=Q->rear=0;
+}
+int QueueLength(SqQueue *Q){
+    //返回Q的元素个数，即队列的长度
+    int e;
+    e=(Q->rear-Q->front+MAXQSIZE)%MAXQSIZE;
+    return e;
+}
+void EnQueue(SqQueue *Q,QElemType e){
+    //插入的元素e为Q的新的队尾元素
+    if((Q->rear+1)%MAXQSIZE ==Q->front) exit(1);
+    Q->base[Q->rear]=e;
+    Q->rear=(Q->rear+1)%MAXQSIZE;
+}
+void DeQueue(SqQueue *Q){
+    //若队列不空，则删除Q的队头元素，用e返回其值
+    if(Q->front==Q->rear)
+        exit(1);
+    //e=Q.base[Q.front];
+    Q->front=(Q->front+1)%MAXQSIZE;
+}
+QElemType GetHead(SqQueue *Q){
+    //返回队头元素
+    return Q->base[Q->front];
+}
+int main(){
+    int N,n,c;
+    QElemType t,x;
+    SqQueue f,*Q;
+    Q=&f;
+    InitQueue(Q);
+    printf("请输入杨辉三角规模:\n");
+    scanf("%d",&N);
+    EnQueue(Q,1);
+    for(n=2;n<=N;n++){
+        EnQueue(Q,1);
+        for(c=1;c<=n-2;c++){
+            t=GetHead(Q);
+            DeQueue(Q);
+            printf("%4d",t);
+            x=GetHead(Q);
+            t=t+x;
+            EnQueue(Q,t);
+        }
+        EnQueue(Q,1);
+        printf("%4d",GetHead(Q));
+        DeQueue(Q);
+        printf("\n");
+    }
+    while(Q->front!=Q->rear){
+            printf("%4d",GetHead(Q));
+            DeQueue(Q);
+        }
+    return 0;
+    }
